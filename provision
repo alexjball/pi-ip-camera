@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ $# -lt 3 -o $# -gt 4 ]; then
+	echo "Usage: ./provision rootfs_path country_code ssid [password]"
+	exit 0
+fi
+
+ROOTFS=$1
+COUNTRY_CODE=$2
+SSID=$3
+
+WPA_CONF=$ROOTFS/etc/wpa_supplicant/wpa_supplicant.conf
+if [ ! -f WPA_CONF ]; then
+	echo "Invalid rootfs"
+	exit 1
+fi
+
+if [ -z $4 ]; then
+	read -s -p "Wifi password: " PASSWORD
+	echo
+else
+	PASSWORD=$4
+fi
+
+echo "country=$COUNTRY_CODE" >> $WPA_CONF
+wpa_passphrase $SSID $PASSWORD | grep -v "psk=\"$PASSWORD\"" >> $WPA_CONF
+
